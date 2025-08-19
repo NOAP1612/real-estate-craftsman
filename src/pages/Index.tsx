@@ -3,6 +3,8 @@ import { StatsCard } from "@/components/ui/stats-card";
 import { PropertyCard } from "@/components/ui/property-card";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Building2, 
   Users, 
@@ -21,6 +23,44 @@ import property2 from "@/assets/property-2.jpg";
 import property3 from "@/assets/property-3.jpg";
 
 const Index = () => {
+  const { toast } = useToast();
+  
+  // Button handlers
+  const addProperty = () => {
+    toast({
+      title: "הוספת נכס",
+      description: "פונקציונליות הוספת נכס תפותח בקרוב",
+    });
+  };
+
+  const viewReports = () => {
+    toast({
+      title: "צפייה בדוחות",
+      description: "פתיחת מערכת הדוחות",
+    });
+  };
+
+  const filterProperties = () => {
+    toast({
+      title: "סינון נכסים",
+      description: "פונקציונליות סינון תפותח בקרוב",
+    });
+  };
+
+  const searchProperties = () => {
+    toast({
+      title: "חיפוש נכסים",
+      description: "פונקציונליות חיפוש תפותח בקרוב",
+    });
+  };
+
+  const addTask = () => {
+    toast({
+      title: "הוספת משימה",
+      description: "פונקציונליות הוספת משימה תפותח בקרוב",
+    });
+  };
+
   // Sample data
   const stats = [
     {
@@ -121,11 +161,19 @@ const Index = () => {
                 הפלטפורמה החכמה לניהול נדל״ן מקצועי. כל מה שאתה צריך במקום אחד.
               </p>
               <div className="flex gap-4">
-                <Button size="lg" className="bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30">
+                <Button 
+                  size="lg" 
+                  className="bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30"
+                  onClick={addProperty}
+                >
                   <Plus className="h-5 w-5 mr-2" />
                   הוסף נכס חדש
                 </Button>
-                <Button variant="secondary" size="lg">
+                <Button 
+                  variant="secondary" 
+                  size="lg"
+                  onClick={viewReports}
+                >
                   <BarChart3 className="h-5 w-5 mr-2" />
                   צפה בדוחות
                 </Button>
@@ -156,11 +204,19 @@ const Index = () => {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-foreground">נכסים אחרונים</h2>
               <div className="flex items-center gap-3">
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={filterProperties}
+                >
                   <Filter className="h-4 w-4 mr-2" />
                   סינון
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={searchProperties}
+                >
                   <Search className="h-4 w-4 mr-2" />
                   חיפוש
                 </Button>
@@ -211,7 +267,11 @@ const Index = () => {
                 ))}
               </div>
               
-              <Button variant="outline" className="w-full mt-4">
+              <Button 
+                variant="outline" 
+                className="w-full mt-4"
+                onClick={addTask}
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 הוסף משימה
               </Button>
@@ -238,6 +298,7 @@ const Index = () => {
           </div>
         </div>
       </div>
+      <Toaster />
     </div>
   );
 };

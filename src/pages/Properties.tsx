@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Toaster } from "@/components/ui/toaster";
+import { useProperties } from "@/hooks/useProperties";
 import { 
   Building2,
   Plus,
@@ -17,85 +19,16 @@ import {
   Facebook,
   Share2
 } from "lucide-react";
-import property1 from "@/assets/property-1.jpg";
-import property2 from "@/assets/property-2.jpg";
-import property3 from "@/assets/property-3.jpg";
 
 const Properties = () => {
-  const properties = [
-    {
-      id: "1",
-      title: "דירת פנטהאוס מדהימה",
-      price: "₪3,200,000",
-      location: "תל אביב, רמת אביב",
-      bedrooms: 4,
-      bathrooms: 3,
-      area: "120 מ״ר",
-      image: property1,
-      status: "for-sale" as const,
-      views: 152
-    },
-    {
-      id: "2", 
-      title: "וילה מודרנית עם גינה",
-      price: "₪15,000/חודש",
-      location: "רעננה, השכונה החדשה",
-      bedrooms: 5,
-      bathrooms: 4,
-      area: "200 מ״ר",
-      image: property2,
-      status: "for-rent" as const,
-      views: 89
-    },
-    {
-      id: "3",
-      title: "דירה חדשה במגדל יוקרה",
-      price: "₪2,800,000",
-      location: "הרצליה פיתוח",
-      bedrooms: 3,
-      bathrooms: 2,
-      area: "95 מ״ר",
-      image: property3,
-      status: "sold" as const,
-      views: 234
-    },
-    {
-      id: "4",
-      title: "בית פרטי עם בריכה",
-      price: "₪4,500,000",
-      location: "כפר סבא",
-      bedrooms: 6,
-      bathrooms: 4,
-      area: "250 מ״ר",
-      image: property1,
-      status: "for-sale" as const,
-      views: 78
-    },
-    {
-      id: "5",
-      title: "דירת גן מרווחת",
-      price: "₪12,000/חודש",
-      location: "גבעתיים",
-      bedrooms: 4,
-      bathrooms: 3,
-      area: "140 מ״ר",
-      image: property2,
-      status: "for-rent" as const,
-      views: 156
-    },
-    {
-      id: "6",
-      title: "פנטהאוס עם נוף לים",
-      price: "₪5,200,000",
-      location: "נתניה",
-      bedrooms: 5,
-      bathrooms: 4,
-      area: "180 מ״ר",
-      image: property3,
-      status: "for-sale" as const,
-      views: 298
-    }
-  ];
+  const { 
+    properties, 
+    searchTerm, 
+    setSearchTerm, 
+    addProperty, 
+    filterProperties, 
+    toggleViewMode 
+  } = useProperties();
 
   return (
     <div className="min-h-screen bg-background">
@@ -108,7 +41,10 @@ const Properties = () => {
             <h1 className="text-3xl font-bold text-foreground mb-2">ניהול נכסים</h1>
             <p className="text-muted-foreground">נהל את תיק הנכסים שלך בצורה חכמה ויעילה</p>
           </div>
-          <Button className="bg-gradient-success hover:shadow-lg">
+          <Button 
+            className="bg-gradient-success hover:shadow-lg"
+            onClick={addProperty}
+          >
             <Plus className="h-5 w-5 mr-2" />
             הוסף נכס חדש
           </Button>
@@ -184,18 +120,29 @@ const Properties = () => {
                   <Input 
                     placeholder="חיפוש נכסים לפי מיקום, מחיר או תיאור..."
                     className="pr-10"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline">
+                  <Button 
+                    variant="outline"
+                    onClick={filterProperties}
+                  >
                     <Filter className="h-4 w-4 mr-2" />
                     סינון
                   </Button>
-                  <Button variant="outline">
+                  <Button 
+                    variant="outline"
+                    onClick={toggleViewMode}
+                  >
                     <Grid3X3 className="h-4 w-4 mr-2" />
                     תצוגה
                   </Button>
-                  <Button variant="outline">
+                  <Button 
+                    variant="outline"
+                    onClick={toggleViewMode}
+                  >
                     <List className="h-4 w-4 mr-2" />
                     רשימה
                   </Button>
@@ -300,6 +247,7 @@ const Properties = () => {
           </TabsContent>
         </Tabs>
       </div>
+      <Toaster />
     </div>
   );
 };

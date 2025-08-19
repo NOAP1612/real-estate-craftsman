@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Toaster } from "@/components/ui/toaster";
+import { useTasks } from "@/hooks/useTasks";
 import { 
   Calendar,
   Plus,
@@ -16,66 +18,7 @@ import {
 } from "lucide-react";
 
 const Tasks = () => {
-  const todayTasks = [
-    {
-      id: "1",
-      task: "פגישה עם משפחת כהן",
-      time: "10:00",
-      type: "meeting",
-      priority: "high",
-      completed: true,
-      client: "משפחת כהן",
-      property: "דירה ברמת אביב"
-    },
-    {
-      id: "2",
-      task: "צילום נכס ברמת גן",
-      time: "14:00",
-      type: "photography",
-      priority: "medium",
-      completed: false,
-      property: "בית פרטי ברמת גן"
-    },
-    {
-      id: "3",
-      task: "חתימה על חוזה",
-      time: "16:30",
-      type: "contract",
-      priority: "high",
-      completed: false,
-      client: "דוד לוי",
-      property: "וילה ברעננה"
-    },
-    {
-      id: "4",
-      task: "שיחת מעקב עם שרה מזרחי",
-      time: "17:00",
-      type: "call",
-      priority: "medium",
-      completed: false,
-      client: "שרה מזרחי"
-    }
-  ];
-
-  const upcomingTasks = [
-    {
-      id: "5",
-      task: "הכנת מצגת לנכס חדש",
-      date: "מחר",
-      type: "preparation",
-      priority: "low",
-      property: "פנטהאוס בהרצליה"
-    },
-    {
-      id: "6",
-      task: "ביקור בנכס עם לקוח",
-      date: "יום חמישי",
-      type: "viewing",
-      priority: "high",
-      client: "משפחת גולד",
-      property: "דירה בגבעתיים"
-    }
-  ];
+  const { todayTasks, upcomingTasks, toggleTask, addTask } = useTasks();
 
   const getTaskIcon = (type: string) => {
     switch (type) {
@@ -118,7 +61,10 @@ const Tasks = () => {
             <h1 className="text-3xl font-bold text-foreground mb-2">ניהול משימות</h1>
             <p className="text-muted-foreground">נהל את המשימות היומיות שלך ועקוב אחרי ההתקדמות</p>
           </div>
-          <Button className="bg-gradient-success hover:shadow-lg">
+          <Button 
+            className="bg-gradient-success hover:shadow-lg"
+            onClick={addTask}
+          >
             <Plus className="h-5 w-5 mr-2" />
             הוסף משימה
           </Button>
@@ -184,6 +130,7 @@ const Tasks = () => {
                     <div className="flex items-center gap-4">
                       <Checkbox 
                         checked={task.completed}
+                        onCheckedChange={() => toggleTask(task.id)}
                         className="data-[state=checked]:bg-secondary data-[state=checked]:border-secondary"
                       />
                       <div className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center">
@@ -270,7 +217,11 @@ const Tasks = () => {
 
             {/* Quick Add */}
             <Card className="p-4 mt-6 border-dashed border-2">
-              <Button variant="ghost" className="w-full h-16">
+              <Button 
+                variant="ghost" 
+                className="w-full h-16"
+                onClick={addTask}
+              >
                 <Plus className="h-5 w-5 mr-2" />
                 הוסף משימה חדשה
               </Button>
@@ -278,6 +229,7 @@ const Tasks = () => {
           </div>
         </div>
       </div>
+      <Toaster />
     </div>
   );
 };

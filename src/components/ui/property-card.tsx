@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import { MapPin, Bed, Bath, Square, Eye, Edit, Share } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +19,7 @@ interface PropertyCardProps {
 }
 
 export function PropertyCard({
+  id,
   title,
   price,
   location,
@@ -29,6 +31,28 @@ export function PropertyCard({
   views = 0,
   className
 }: PropertyCardProps) {
+  const { toast } = useToast();
+
+  const handleView = () => {
+    toast({
+      title: "צפייה בנכס",
+      description: `פתיחת פרטי הנכס: ${title}`,
+    });
+  };
+
+  const handleEdit = () => {
+    toast({
+      title: "עריכת נכס",
+      description: `עריכת הנכס: ${title}`,
+    });
+  };
+
+  const handleShare = () => {
+    toast({
+      title: "שיתוף נכס",
+      description: `הנכס ${title} נשתף בהצלחה`,
+    });
+  };
   const getStatusColor = () => {
     switch (status) {
       case "for-sale": return "bg-secondary text-secondary-foreground";
@@ -75,13 +99,28 @@ export function PropertyCard({
 
         {/* Quick Actions */}
         <div className="absolute bottom-3 left-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <Button size="sm" variant="secondary" className="h-8 w-8 p-0">
+          <Button 
+            size="sm" 
+            variant="secondary" 
+            className="h-8 w-8 p-0"
+            onClick={handleView}
+          >
             <Eye className="h-4 w-4" />
           </Button>
-          <Button size="sm" variant="secondary" className="h-8 w-8 p-0">
+          <Button 
+            size="sm" 
+            variant="secondary" 
+            className="h-8 w-8 p-0"
+            onClick={handleEdit}
+          >
             <Edit className="h-4 w-4" />
           </Button>
-          <Button size="sm" variant="secondary" className="h-8 w-8 p-0">
+          <Button 
+            size="sm" 
+            variant="secondary" 
+            className="h-8 w-8 p-0"
+            onClick={handleShare}
+          >
             <Share className="h-4 w-4" />
           </Button>
         </div>
