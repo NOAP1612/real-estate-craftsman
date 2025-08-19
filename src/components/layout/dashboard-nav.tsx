@@ -2,6 +2,9 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useAuthStore } from '@/store/authStore';
 import { 
   Home, 
   Building2, 
@@ -12,7 +15,9 @@ import {
   Settings,
   Bell,
   Search,
-  Plus
+  Plus,
+  LogOut,
+  User
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -37,6 +42,11 @@ const navigation: NavItem[] = [
 export function DashboardNav() {
   const [searchFocused, setSearchFocused] = useState(false);
   const location = useLocation();
+  const { user, signOut } = useAuthStore();
+
+  const userInitials = user?.user_metadata?.first_name && user?.user_metadata?.last_name
+    ? `${user.user_metadata.first_name[0]}${user.user_metadata.last_name[0]}`
+    : user?.email?.[0]?.toUpperCase() || 'U';
 
   return (
     <div className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/50">
@@ -119,6 +129,29 @@ export function DashboardNav() {
               <Plus className="h-4 w-4 mr-2" />
               הוסף חדש
             </Button>
+
+            {/* User Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                      {userInitials}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>פרופיל</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={signOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>התנתק</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
