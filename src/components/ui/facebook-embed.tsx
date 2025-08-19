@@ -36,19 +36,41 @@ export function FacebookEmbed({ onAdd }: FacebookEmbedProps) {
   useEffect(() => {
     // Load Facebook SDK
     if (!window.FB) {
+      // Remove existing Facebook SDK if present
+      const existingScript = document.getElementById('facebook-jssdk');
+      if (existingScript) {
+        existingScript.remove();
+      }
+
+      // Add Facebook SDK div
+      if (!document.getElementById('fb-root')) {
+        const fbRoot = document.createElement('div');
+        fbRoot.id = 'fb-root';
+        document.body.appendChild(fbRoot);
+      }
+
       const script = document.createElement('script');
+      script.id = 'facebook-jssdk';
       script.async = true;
       script.defer = true;
       script.crossOrigin = 'anonymous';
-      script.src = 'https://connect.facebook.net/he_IL/sdk.js#xfbml=1&version=v18.0';
-      document.head.appendChild(script);
-
+      script.src = 'https://connect.facebook.net/he_IL/sdk.js#xfbml=1&version=v19.0&appId=your-app-id';
+      
       script.onload = () => {
-        window.FB.init({
-          xfbml: true,
-          version: 'v18.0'
-        });
+        console.log('Facebook SDK loaded');
+        if (window.FB) {
+          window.FB.init({
+            xfbml: true,
+            version: 'v19.0'
+          });
+        }
       };
+
+      script.onerror = () => {
+        console.error('Failed to load Facebook SDK');
+      };
+
+      document.head.appendChild(script);
     }
   }, []);
 
@@ -57,36 +79,63 @@ export function FacebookEmbed({ onAdd }: FacebookEmbedProps) {
     setIsLoading(true);
 
     try {
-      // Validate Facebook URL
-      if (!postUrl.includes('facebook.com')) {
+      console.log('Processing Facebook URL:', postUrl);
+      
+      // Validate and clean Facebook URL
+      let cleanUrl = postUrl.trim();
+      
+      // Handle different Facebook URL formats
+      if (cleanUrl.includes('facebook.com/share/p/')) {
+        // This is a new Facebook share URL format - convert to post format
+        const shareId = cleanUrl.split('/p/')[1]?.split('/')[0];
+        if (shareId) {
+          // For now, we'll use the original URL but let user know about limitations
+          console.log('Detected new Facebook share URL format');
+        }
+      }
+      
+      if (!cleanUrl.includes('facebook.com')) {
         throw new Error('אנא הכנס קישור פייסבוק תקין');
       }
 
-      // Generate embed HTML
+      // Generate embed HTML with better error handling
       const embedCode = `
         <div class="fb-post" 
-             data-href="${postUrl}" 
+             data-href="${cleanUrl}" 
              data-width="500" 
-             data-show-text="true">
-          <blockquote cite="${postUrl}" class="fb-xfbml-parse-ignore">
-            <p>טוען פוסט פייסבוק...</p>
-            <a href="${postUrl}">צפה בפוסט</a>
+             data-show-text="true"
+             data-lazy="true">
+          <blockquote cite="${cleanUrl}" class="fb-xfbml-parse-ignore">
+            <div style="padding: 20px; text-align: center; border: 1px solid #ddd; border-radius: 8px;">
+              <p>טוען פוסט פייסבוק...</p>
+              <p style="margin: 10px 0;">אם הפוסט לא נטען, ייתכן שהוא פרטי או שהקישור אינו תקין</p>
+              <a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" style="color: #1877F2;">
+                צפה בפוסט בפייסבוק
+              </a>
+            </div>
           </blockquote>
         </div>
       `;
 
       setEmbedHtml(embedCode);
 
-      // Trigger Facebook SDK to parse new content
-      if (window.FB) {
-        setTimeout(() => {
+      // Trigger Facebook SDK to parse new content with retry mechanism
+      const parseWithRetry = (attempts = 0) => {
+        if (window.FB && window.FB.XFBML) {
+          console.log('Parsing Facebook content, attempt:', attempts + 1);
           window.FB.XFBML.parse();
-        }, 100);
-      }
+        } else if (attempts < 5) {
+          setTimeout(() => parseWithRetry(attempts + 1), 500);
+        } else {
+          console.warn('Facebook SDK not available after multiple attempts');
+        }
+      };
+
+      setTimeout(() => parseWithRetry(), 100);
 
       toast({
-        title: "הצלחה!",
-        description: "הפוסט נוסף בהצלחה",
+        title: "הפוסט נוסף בהצלחה",
+        description: "אם הפוסט לא נטען, בדוק שהקישור תקין והפוסט ציבורי",
       });
 
       if (onAdd) {
@@ -162,13 +211,15 @@ export function FacebookEmbed({ onAdd }: FacebookEmbedProps) {
               type="url"
               value={postUrl}
               onChange={(e) => setPostUrl(e.target.value)}
-              placeholder="https://www.facebook.com/user/posts/123456789"
+              placeholder="https://www.facebook.com/username/posts/123456789 או https://www.facebook.com/share/p/abc123"
               required
-              className="mt-1"
+              className="mt-1 text-sm"
             />
-            <p className="text-xs text-muted-foreground mt-1">
-              העתק את הקישור המלא לפוסט מפייסבוק
-            </p>
+            <div className="text-xs text-muted-foreground mt-1 space-y-1">
+              <p>• העתק את הקישור המלא לפוסט מפייסבוק</p>
+              <p>• הפוסט חייב להיות ציבורי כדי שניתן יהיה להציג אותו</p>
+              <p>• פוסטים פרטיים או של דפים עם הגבלות לא יוצגו</p>
+            </div>
           </div>
 
           <div className="flex gap-2">
@@ -216,8 +267,11 @@ export function FacebookEmbed({ onAdd }: FacebookEmbedProps) {
         </Button>
       </div>
 
-      <div className="fb-post-container">
+      <div className="fb-post-container" style={{ minHeight: '200px' }}>
         <div dangerouslySetInnerHTML={{ __html: embedHtml }} />
+        <div className="mt-2 text-xs text-muted-foreground">
+          אם הפוסט לא נטען כראוי, נסה לרענן את הדף או לבדוק שהקישור תקין
+        </div>
       </div>
 
       {/* Mock engagement stats */}
