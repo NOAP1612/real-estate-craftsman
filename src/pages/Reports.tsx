@@ -1,6 +1,8 @@
 import { DashboardNav } from "@/components/layout/dashboard-nav";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Toaster } from "@/components/ui/toaster";
+import { useReports } from "@/hooks/useReports";
 import { 
   BarChart3,
   TrendingUp,
@@ -15,29 +17,16 @@ import {
 } from "lucide-react";
 
 const Reports = () => {
-  const salesData = [
-    { month: "ינואר", sales: 850000, deals: 3 },
-    { month: "פברואר", sales: 1200000, deals: 4 },
-    { month: "מרץ", sales: 980000, deals: 2 },
-    { month: "אפריל", sales: 1450000, deals: 5 },
-    { month: "מאי", sales: 1100000, deals: 3 },
-    { month: "יוני", sales: 1680000, deals: 6 }
-  ];
-
-  const topProperties = [
-    { id: "1", name: "פנטהאוס בתל אביב", views: 456, inquiries: 23, status: "sold" },
-    { id: "2", name: "וילה ברעננה", views: 389, inquiries: 18, status: "for-sale" },
-    { id: "3", name: "דירה בהרצליה", views: 334, inquiries: 15, status: "for-rent" },
-    { id: "4", name: "בית בכפר סבא", views: 298, inquiries: 12, status: "for-sale" },
-    { id: "5", name: "דירת גן בגבעתיים", views: 267, inquiries: 11, status: "sold" }
-  ];
-
-  const clientStats = [
-    { type: "לקוחות חדשים", count: 24, change: "+18%" },
-    { type: "פגישות בוצעו", count: 67, change: "+12%" },
-    { type: "עסקאות נסגרו", count: 8, change: "+25%" },
-    { type: "שיעור המרה", count: "12%", change: "+3%" }
-  ];
+  const { 
+    salesData, 
+    topProperties, 
+    clientStats, 
+    filterReports, 
+    exportReport, 
+    exportToPDF, 
+    scheduleAutoReport, 
+    generateDetailedReport 
+  } = useReports();
 
   return (
     <div className="min-h-screen bg-background">
@@ -51,11 +40,11 @@ const Reports = () => {
             <p className="text-muted-foreground">עקוב אחרי הביצועים שלך וקבל תובנות עסקיות</p>
           </div>
           <div className="flex gap-3">
-            <Button variant="outline">
+            <Button variant="outline" onClick={filterReports}>
               <Filter className="h-4 w-4 mr-2" />
               סינון
             </Button>
-            <Button className="bg-gradient-success hover:shadow-lg">
+            <Button className="bg-gradient-success hover:shadow-lg" onClick={exportReport}>
               <Download className="h-4 w-4 mr-2" />
               ייצא דוח
             </Button>
@@ -211,21 +200,22 @@ const Reports = () => {
         {/* Report Actions */}
         <div className="flex justify-center mt-8">
           <div className="flex gap-4">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={generateDetailedReport}>
               <FileText className="h-4 w-4" />
               דוח מפורט
             </Button>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={exportToPDF}>
               <Download className="h-4 w-4" />
               ייצא ל-PDF
             </Button>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={scheduleAutoReport}>
               <Calendar className="h-4 w-4" />
               תזמן דוח אוטומטי
             </Button>
           </div>
         </div>
       </div>
+      <Toaster />
     </div>
   );
 };

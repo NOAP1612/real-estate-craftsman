@@ -1,6 +1,8 @@
 import { DashboardNav } from "@/components/layout/dashboard-nav";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Toaster } from "@/components/ui/toaster";
+import { useDesigner } from "@/hooks/useDesigner";
 import { 
   PenTool,
   Plus,
@@ -15,71 +17,15 @@ import {
 } from "lucide-react";
 
 const Designer = () => {
-  const templates = [
-    {
-      id: "1",
-      name: "באנר למכירה - קלאסי",
-      category: "sale",
-      size: "1080x1080",
-      type: "instagram"
-    },
-    {
-      id: "2", 
-      name: "סטורי להשכרה",
-      category: "rent",
-      size: "1080x1920",
-      type: "story"
-    },
-    {
-      id: "3",
-      name: "פליירמודעת וואטסאפ",
-      category: "whatsapp",
-      size: "800x600",
-      type: "flyer"
-    },
-    {
-      id: "4",
-      name: "שלט חוצות",
-      category: "print",
-      size: "300x200",
-      type: "billboard"
-    },
-    {
-      id: "5",
-      name: "באנר פייסבוק",
-      category: "facebook",
-      size: "1200x628",
-      type: "social"
-    },
-    {
-      id: "6",
-      name: "כרטיס ביקור דיגיטלי",
-      category: "business",
-      size: "600x400",
-      type: "card"
-    }
-  ];
-
-  const recentDesigns = [
-    {
-      id: "1",
-      name: "דירה בתל אביב - למכירה",
-      created: "היום",
-      downloads: 5
-    },
-    {
-      id: "2",
-      name: "וילה ברעננה - להשכרה", 
-      created: "אתמול",
-      downloads: 12
-    },
-    {
-      id: "3",
-      name: "פנטהאוס בהרצליה",
-      created: "לפני 3 ימים",
-      downloads: 8
-    }
-  ];
+  const { 
+    templates, 
+    recentDesigns, 
+    createNewDesign, 
+    useTemplate, 
+    downloadDesign, 
+    shareDesign, 
+    quickCreate 
+  } = useDesigner();
 
   const getCategoryColor = (category: string) => {
     switch (category) {
@@ -116,7 +62,7 @@ const Designer = () => {
             <h1 className="text-3xl font-bold text-foreground mb-2">מעצב באנרים וגרפיקה</h1>
             <p className="text-muted-foreground">צור באנרים מקצועיים ומותאמים אישית בקלות</p>
           </div>
-          <Button className="bg-gradient-success hover:shadow-lg">
+          <Button className="bg-gradient-success hover:shadow-lg" onClick={createNewDesign}>
             <Plus className="h-5 w-5 mr-2" />
             יצירה חדשה
           </Button>
@@ -202,7 +148,7 @@ const Designer = () => {
                       {template.type === "card" && "מותאם לכרטיס ביקור"}
                     </p>
                     
-                    <Button variant="outline" className="w-full">
+                    <Button variant="outline" className="w-full" onClick={() => useTemplate(template.id)}>
                       השתמש בתבנית
                     </Button>
                   </Card>
@@ -231,11 +177,11 @@ const Designer = () => {
                     <span>PNG • HD</span>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => downloadDesign(design.id)}>
                       <Download className="h-3 w-3 mr-1" />
                       הורד
                     </Button>
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => shareDesign(design.id)}>
                       <Share2 className="h-3 w-3 mr-1" />
                       שתף
                     </Button>
@@ -252,7 +198,7 @@ const Designer = () => {
                 <p className="text-sm text-muted-foreground mb-4">
                   צור באנר חדש עם הנכסים שלך בקלות
                 </p>
-                <Button className="w-full bg-gradient-primary">
+                <Button className="w-full bg-gradient-primary" onClick={quickCreate}>
                   יצירה מהירה
                 </Button>
               </div>
@@ -260,6 +206,7 @@ const Designer = () => {
           </div>
         </div>
       </div>
+      <Toaster />
     </div>
   );
 };

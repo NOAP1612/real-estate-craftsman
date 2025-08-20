@@ -63,7 +63,7 @@ const Tasks = () => {
           </div>
           <Button 
             className="bg-gradient-success hover:shadow-lg"
-            onClick={addTask}
+            onClick={() => addTask(false)}
           >
             <Plus className="h-5 w-5 mr-2" />
             הוסף משימה
@@ -220,7 +220,7 @@ const Tasks = () => {
               <Button 
                 variant="ghost" 
                 className="w-full h-16"
-                onClick={addTask}
+                onClick={() => addTask(true)}
               >
                 <Plus className="h-5 w-5 mr-2" />
                 הוסף משימה חדשה

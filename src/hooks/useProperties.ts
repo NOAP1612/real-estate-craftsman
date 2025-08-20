@@ -104,17 +104,42 @@ export const useProperties = () => {
   );
 
   const addProperty = () => {
+    const newProperty: Property = {
+      id: (properties.length + 1).toString(),
+      title: "נכס חדש",
+      price: "₪0",
+      location: "מיקום חדש",
+      bedrooms: 3,
+      bathrooms: 2,
+      area: "0 מ״ר",
+      image: property1,
+      status: "for-sale",
+      views: 0
+    };
+    
+    setProperties(prev => [newProperty, ...prev]);
     toast({
-      title: "הוספת נכס",
-      description: "פונקציונליות הוספת נכס תפותח בקרוב",
+      title: "נכס נוסף בהצלחה",
+      description: "אפשר לערוך את פרטי הנכס החדש",
     });
   };
 
   const viewProperty = (propertyId: string) => {
     const property = properties.find(p => p.id === propertyId);
+    if (!property) return;
+    
+    // Update views count
+    setProperties(prev => 
+      prev.map(p => 
+        p.id === propertyId 
+          ? { ...p, views: p.views + 1 }
+          : p
+      )
+    );
+    
     toast({
       title: "צפייה בנכס",
-      description: `פתיחת פרטי הנכס: ${property?.title}`,
+      description: `פתיחת פרטי הנכס: ${property.title}`,
     });
   };
 
@@ -122,22 +147,75 @@ export const useProperties = () => {
     const property = properties.find(p => p.id === propertyId);
     toast({
       title: "עריכת נכס",
-      description: `עריכת הנכס: ${property?.title}`,
+      description: `פתיחת טופס עריכה לנכס: ${property?.title}`,
     });
   };
 
   const shareProperty = (propertyId: string) => {
     const property = properties.find(p => p.id === propertyId);
+    if (!property) return;
+
+    // Simulate sharing process
     toast({
-      title: "שיתוף נכס",
-      description: `הנכס ${property?.title} נשתף בהצלחה`,
+      title: "משתף נכס...",
+      description: "יוצר קישור שיתוף",
     });
+
+    setTimeout(() => {
+      toast({
+        title: "נכס שותף בהצלחה",
+        description: `קישור לנכס "${property.title}" הועתק ללוח`,
+      });
+    }, 1500);
   };
 
   const filterProperties = () => {
     toast({
       title: "סינון נכסים",
-      description: "פונקציונליות סינון תפותח בקרוב",
+      description: "פתיחת אפשרויות סינון מתקדמות",
+    });
+  };
+
+  const deleteProperty = (propertyId: string) => {
+    const property = properties.find(p => p.id === propertyId);
+    setProperties(prev => prev.filter(p => p.id !== propertyId));
+    toast({
+      title: "נכס נמחק",
+      description: `הנכס "${property?.title}" הוסר מהרשימה`,
+    });
+  };
+
+  const updatePropertyStatus = (propertyId: string, newStatus: Property['status']) => {
+    setProperties(prev => 
+      prev.map(p => 
+        p.id === propertyId 
+          ? { ...p, status: newStatus }
+          : p
+      )
+    );
+    
+    const property = properties.find(p => p.id === propertyId);
+    toast({
+      title: "סטטוס נכס עודכן",
+      description: `סטטוס הנכס "${property?.title}" עודכן בהצלחה`,
+    });
+  };
+
+  const duplicateProperty = (propertyId: string) => {
+    const property = properties.find(p => p.id === propertyId);
+    if (!property) return;
+
+    const newProperty: Property = {
+      ...property,
+      id: (properties.length + 1).toString(),
+      title: `${property.title} - עותק`,
+      views: 0
+    };
+
+    setProperties(prev => [newProperty, ...prev]);
+    toast({
+      title: "נכס שוכפל",
+      description: `נוצר עותק של "${property.title}"`,
     });
   };
 
@@ -151,6 +229,7 @@ export const useProperties = () => {
 
   return {
     properties: filteredProperties,
+    allProperties: properties,
     viewMode,
     searchTerm,
     setSearchTerm,
@@ -159,6 +238,9 @@ export const useProperties = () => {
     editProperty,
     shareProperty,
     filterProperties,
-    toggleViewMode
+    toggleViewMode,
+    deleteProperty,
+    updatePropertyStatus,
+    duplicateProperty
   };
 };

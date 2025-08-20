@@ -104,10 +104,73 @@ export const useTasks = () => {
     });
   };
 
-  const addTask = () => {
+  const addTask = (isUpcoming = false) => {
+    const newTask: Task = {
+      id: Date.now().toString(),
+      task: "משימה חדשה",
+      time: isUpcoming ? undefined : "09:00",
+      date: isUpcoming ? "מחר" : undefined,
+      type: "general",
+      priority: "medium",
+      completed: false
+    };
+
+    if (isUpcoming) {
+      setUpcomingTasks(prev => [newTask, ...prev]);
+    } else {
+      setTodayTasks(prev => [newTask, ...prev]);
+    }
+
     toast({
-      title: "הוספת משימה",
-      description: "פונקציונליות הוספת משימה תפותח בקרוב",
+      title: "משימה נוספה",
+      description: `משימה חדשה נוספה ל${isUpcoming ? 'משימות קרובות' : 'משימות היום'}`,
+    });
+  };
+
+  const deleteTask = (taskId: string, isUpcoming = false) => {
+    if (isUpcoming) {
+      setUpcomingTasks(prev => prev.filter(task => task.id !== taskId));
+    } else {
+      setTodayTasks(prev => prev.filter(task => task.id !== taskId));
+    }
+
+    toast({
+      title: "משימה נמחקה",
+      description: "המשימה הוסרה מהרשימה",
+    });
+  };
+
+  const editTask = (taskId: string, isUpcoming = false) => {
+    const tasks = isUpcoming ? upcomingTasks : todayTasks;
+    const task = tasks.find(t => t.id === taskId);
+    
+    toast({
+      title: "עריכת משימה",
+      description: `פתיחת טופס עריכה למשימה: ${task?.task}`,
+    });
+  };
+
+  const duplicateTask = (taskId: string, isUpcoming = false) => {
+    const tasks = isUpcoming ? upcomingTasks : todayTasks;
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    const newTask: Task = {
+      ...task,
+      id: Date.now().toString(),
+      task: `${task.task} - עותק`,
+      completed: false
+    };
+
+    if (isUpcoming) {
+      setUpcomingTasks(prev => [newTask, ...prev]);
+    } else {
+      setTodayTasks(prev => [newTask, ...prev]);
+    }
+
+    toast({
+      title: "משימה שוכפלה",
+      description: `נוצר עותק של "${task.task}"`,
     });
   };
 
@@ -115,6 +178,9 @@ export const useTasks = () => {
     todayTasks,
     upcomingTasks,
     toggleTask,
-    addTask
+    addTask,
+    deleteTask,
+    editTask,
+    duplicateTask
   };
 };

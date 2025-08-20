@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Toaster } from "@/components/ui/toaster";
+import { useClients } from "@/hooks/useClients";
 import { 
   Users,
   Plus,
@@ -16,52 +18,15 @@ import {
 } from "lucide-react";
 
 const Clients = () => {
-  const clients = [
-    {
-      id: "1",
-      name: "משפחת כהן",
-      email: "cohen@email.com",
-      phone: "050-1234567",
-      status: "active",
-      lastContact: "לפני יומיים",
-      interestedIn: "דירת 4 חדרים בתל אביב",
-      budget: "₪2,500,000 - ₪3,000,000",
-      priority: "high"
-    },
-    {
-      id: "2",
-      name: "דוד לוי",
-      email: "david.levi@email.com",
-      phone: "052-9876543",
-      status: "negotiating",
-      lastContact: "היום",
-      interestedIn: "וילה ברעננה",
-      budget: "₪4,000,000 - ₪5,000,000",
-      priority: "high"
-    },
-    {
-      id: "3",
-      name: "שרה מזרחי",
-      email: "sara.m@email.com",
-      phone: "054-5555555",
-      status: "viewing",
-      lastContact: "אתמול",
-      interestedIn: "דירה להשכרה בהרצליה",
-      budget: "₪12,000 - ₪15,000/חודש",
-      priority: "medium"
-    },
-    {
-      id: "4",
-      name: "איתן גולד",
-      email: "eitan.gold@email.com",
-      phone: "053-7777777",
-      status: "lead",
-      lastContact: "לפני שבוע",
-      interestedIn: "השקעה בנדל״ן",
-      budget: "₪1,500,000 - ₪2,000,000",
-      priority: "low"
-    }
-  ];
+  const { 
+    clients, 
+    searchTerm, 
+    setSearchTerm, 
+    addClient, 
+    callClient, 
+    sendEmail, 
+    scheduleMeeting 
+  } = useClients();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -103,7 +68,7 @@ const Clients = () => {
             <h1 className="text-3xl font-bold text-foreground mb-2">ניהול לקוחות</h1>
             <p className="text-muted-foreground">נהל את קשרי הלקוחות שלך ועקוב אחרי ההזדמנויות</p>
           </div>
-          <Button className="bg-gradient-success hover:shadow-lg">
+          <Button className="bg-gradient-success hover:shadow-lg" onClick={addClient}>
             <Plus className="h-5 w-5 mr-2" />
             הוסף לקוח חדש
           </Button>
@@ -164,6 +129,8 @@ const Clients = () => {
             <Input 
               placeholder="חיפוש לקוחות לפי שם, טלפון או אימייל..."
               className="pr-10"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </Card>
@@ -220,15 +187,15 @@ const Clients = () => {
               </div>
 
               <div className="flex gap-2 mt-4">
-                <Button variant="outline" size="sm" className="flex-1">
+                <Button variant="outline" size="sm" className="flex-1" onClick={() => callClient(client.id)}>
                   <Phone className="h-4 w-4 mr-2" />
                   התקשר
                 </Button>
-                <Button variant="outline" size="sm" className="flex-1">
+                <Button variant="outline" size="sm" className="flex-1" onClick={() => sendEmail(client.id)}>
                   <Mail className="h-4 w-4 mr-2" />
                   שלח מייל
                 </Button>
-                <Button variant="outline" size="sm" className="flex-1">
+                <Button variant="outline" size="sm" className="flex-1" onClick={() => scheduleMeeting(client.id)}>
                   <Calendar className="h-4 w-4 mr-2" />
                   קבע פגישה
                 </Button>
@@ -237,6 +204,7 @@ const Clients = () => {
           ))}
         </div>
       </div>
+      <Toaster />
     </div>
   );
 };
