@@ -103,24 +103,24 @@ export const useProperties = () => {
     property.location.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const addProperty = () => {
+  const addProperty = (propertyData?: Partial<Property>) => {
     const newProperty: Property = {
       id: (properties.length + 1).toString(),
-      title: "נכס חדש",
-      price: "₪0",
-      location: "מיקום חדש",
-      bedrooms: 3,
-      bathrooms: 2,
-      area: "0 מ״ר",
-      image: property1,
-      status: "for-sale",
-      views: 0
+      title: propertyData?.title || "נכס חדש",
+      price: propertyData?.price || "₪0",
+      location: propertyData?.location || "מיקום חדש",
+      bedrooms: propertyData?.bedrooms || 3,
+      bathrooms: propertyData?.bathrooms || 2,
+      area: propertyData?.area || "0 מ״ר",
+      image: property1, // Default image for now
+      status: propertyData?.status || "for-sale",
+      views: propertyData?.views || 0
     };
     
     setProperties(prev => [newProperty, ...prev]);
     toast({
       title: "נכס נוסף בהצלחה",
-      description: "אפשר לערוך את פרטי הנכס החדש",
+      description: "הנכס החדש נוסף למערכת",
     });
   };
 

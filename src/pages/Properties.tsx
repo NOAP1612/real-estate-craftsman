@@ -1,6 +1,7 @@
 import { DashboardNav } from "@/components/layout/dashboard-nav";
 import { PropertyCard } from "@/components/ui/property-card";
 import { FacebookEmbed } from "@/components/ui/facebook-embed";
+import { AddPropertyDialog } from "@/components/ui/add-property-dialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -41,13 +42,12 @@ const Properties = () => {
             <h1 className="text-3xl font-bold text-foreground mb-2">ניהול נכסים</h1>
             <p className="text-muted-foreground">נהל את תיק הנכסים שלך בצורה חכמה ויעילה</p>
           </div>
-          <Button 
-            className="bg-gradient-success hover:shadow-lg"
-            onClick={addProperty}
-          >
-            <Plus className="h-5 w-5 mr-2" />
-            הוסף נכס חדש
-          </Button>
+          <AddPropertyDialog onPropertyAdded={addProperty}>
+            <Button className="bg-gradient-success hover:shadow-lg">
+              <Plus className="h-5 w-5 mr-2" />
+              הוסף נכס חדש
+            </Button>
+          </AddPropertyDialog>
         </div>
 
         {/* Stats Cards */}
