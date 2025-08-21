@@ -27,21 +27,47 @@ serve(async (req) => {
 
     console.log('Analyzing URL:', url);
 
-    // Fetch website content
-    const websiteResponse = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-      }
-    });
+    // Try to fetch website content with multiple approaches
+    let html = '';
+    let fetchMethod = 'direct';
     
-    if (!websiteResponse.ok) {
-      throw new Error(`Failed to fetch website: ${websiteResponse.status}`);
+    try {
+      const websiteResponse = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'Accept-Language': 'he,en-US;q=0.7,en;q=0.3',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+      
+      if (!websiteResponse.ok) {
+        throw new Error(`HTTP ${websiteResponse.status}: ${websiteResponse.statusText}`);
+      }
+
+      html = await websiteResponse.text();
+      console.log('Fetched HTML content, length:', html.length);
+      
+    } catch (fetchError) {
+      console.log('Direct fetch failed:', fetchError.message);
+      
+      // Fallback: Use basic URL analysis without content fetching
+      fetchMethod = 'fallback';
+      const urlObj = new URL(url);
+      html = `<title>נכס מ-${urlObj.hostname}</title><meta property="og:title" content="נכס מ-${urlObj.hostname}">`;
+      console.log('Using fallback method due to fetch failure');
     }
 
-    const html = await websiteResponse.text();
-    console.log('Fetched HTML content, length:', html.length);
-
     // Use OpenAI to analyze the content
+    const systemPrompt = fetchMethod === 'fallback' 
+      ? 'אתה מומחה לניתוח נכסי נדל"ן. על בסיס הקישור שניתן, נסה לחלץ מידע בסיסי על הנכס. החזר JSON תקין עם השדות הבאים: title, price, location, rooms, bathrooms, area, description, features. אם אין מידע זמין לשדה מסוים, השתמש ב-null.'
+      : 'אתה מומחה לניתוח נכסי נדל"ן. נתח את תוכן HTML של אתר הנכס וחלץ את המידע הרלוונטי. החזר JSON תקין עם השדות הבאים: title, price, location, rooms, bathrooms, area, description, features. אם אין מידע זמין לשדה מסוים, השתמש ב-null.';
+    
+    const userContent = fetchMethod === 'fallback'
+      ? `נתח את הקישור הזה וחלץ מידע בסיסי על הנכס: ${url}`
+      : `נתח את תוכן HTML הזה וחלץ פרטי נכס: ${html.slice(0, 12000)}`;
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -49,24 +75,26 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4.1-2025-04-14',
         messages: [
           {
             role: 'system',
-            content: 'אתה מומחה לניתוח נכסי נדל"ן. נתח את תוכן HTML של אתר הנכס וחלץ את המידע הרלוונטי. החזר JSON תקין עם השדות הבאים: title, price, location, rooms, bathrooms, area, description, features. אם אין מידע זמין לשדה מסוים, השתמש ב-null.'
+            content: systemPrompt
           },
           {
             role: 'user',
-            content: `נתח את תוכן HTML הזה וחלץ פרטי נכס: ${html.slice(0, 8000)}`
+            content: userContent
           }
         ],
-        max_tokens: 1000,
-        temperature: 0.2
+        max_completion_tokens: 1000,
+        temperature: 0.1
       }),
     });
 
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status}`);
+      const errorText = await response.text();
+      console.error(`OpenAI API error ${response.status}:`, errorText);
+      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
@@ -80,7 +108,8 @@ serve(async (req) => {
       return new Response(JSON.stringify({ 
         success: true, 
         data: propertyData,
-        originalUrl: url 
+        originalUrl: url,
+        fetchMethod: fetchMethod
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -88,19 +117,22 @@ serve(async (req) => {
       console.error('Failed to parse JSON:', parseError);
       
       // Return structured data even if parsing fails
+      const hostname = new URL(url).hostname;
       return new Response(JSON.stringify({
         success: true,
         data: {
-          title: 'נכס מ-' + new URL(url).hostname,
+          title: `נכס מ-${hostname}`,
           price: null,
           location: null,
-          rooms: null,
-          bathrooms: null,
+          rooms: 3,
+          bathrooms: 2,
           area: null,
-          description: analysisResult,
+          description: `נכס שנמצא ב-${hostname}. ${analysisResult}`,
           features: []
         },
-        originalUrl: url
+        originalUrl: url,
+        fetchMethod: fetchMethod,
+        note: 'לא הצלחנו לנתח את הקישור במלואו, אנא עדכן את הפרטים ידנית'
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });

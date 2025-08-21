@@ -73,21 +73,35 @@ export const AddPropertyDialog = ({ onPropertyAdded, children }: AddPropertyDial
         if (propertyData.title) form.setValue('title', propertyData.title);
         if (propertyData.price) form.setValue('price', propertyData.price);
         if (propertyData.location) form.setValue('location', propertyData.location);
-        if (propertyData.rooms) form.setValue('rooms', parseInt(propertyData.rooms));
-        if (propertyData.bathrooms) form.setValue('bathrooms', parseInt(propertyData.bathrooms));
+        if (propertyData.rooms) form.setValue('rooms', parseInt(propertyData.rooms) || 3);
+        if (propertyData.bathrooms) form.setValue('bathrooms', parseInt(propertyData.bathrooms) || 2);
         if (propertyData.area) form.setValue('area', propertyData.area);
         if (propertyData.description) form.setValue('description', propertyData.description);
 
-        toast({
-          title: "ניתוח הושלם!",
-          description: "פרטי הנכס חולצו בהצלחה מהקישור",
-        });
+        // Show different messages based on analysis quality
+        if (data.fetchMethod === 'fallback' || data.note) {
+          toast({
+            title: "ניתוח חלקי הושלם",
+            description: data.note || "חולצו פרטים בסיסיים, אנא השלם את החסרים ידנית",
+            variant: "default",
+          });
+        } else {
+          toast({
+            title: "ניתוח הושלם!",
+            description: "פרטי הנכס חולצו בהצלחה מהקישור",
+          });
+        }
       }
     } catch (error) {
       console.error('Error analyzing URL:', error);
+      
+      // Fill basic info even on error
+      const hostname = new URL(url).hostname;
+      form.setValue('title', `נכס מ-${hostname}`);
+      
       toast({
-        title: "שגיאה בניתוח",
-        description: "לא הצלחנו לנתח את הקישור. אנא מלא את הפרטים ידנית",
+        title: "שגיאה בניתוח הקישור",
+        description: `לא הצלחנו לנתח את ${hostname}. הוספנו כותרת בסיסית, אנא מלא את שאר הפרטים ידנית`,
         variant: "destructive",
       });
     } finally {
